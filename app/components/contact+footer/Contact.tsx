@@ -35,52 +35,53 @@ export default function Contact() {
     if (inView) {
       setViewCount((c) => c + 1);
     }
-  }, [inView]);
+  }, [inView, setSectionInView]);
 
   const { formState, register, handleSubmit, reset } = useForm();
   const { errors } = formState;
 
+  // For email.js
   const formRef = useRef<HTMLFormElement>(null);
 
   function onSubmit(data: any) {
-    if (
-      !process.env.NEXT_PUBLIC_SERVICE_ID ||
-      !process.env.NEXT_PUBLIC_TEMPLATE_ID ||
-      !process.env.NEXT_PUBLIC_PUBLIC_KEY
-    ) {
-      toast.error("EmailJS config missing in .env.local", {
-        position: "bottom-left",
-        autoClose: 3000,
-        theme: "dark",
-      });
-      return;
-    }
-
-    if (!formRef.current) return;
+    console.log(data);
 
     emailjs
       .sendForm(
-        process.env.NEXT_PUBLIC_SERVICE_ID,
-        process.env.NEXT_PUBLIC_TEMPLATE_ID,
-        formRef.current,
-        process.env.NEXT_PUBLIC_PUBLIC_KEY
+        `${process.env.NEXT_PUBLIC_SERVICE_ID}`,
+        `${process.env.NEXT_PUBLIC_TEMPLATE_ID}`,
+        formRef.current as HTMLFormElement,
+        {
+          publicKey: `${process.env.NEXT_PUBLIC_PUBLIC_KEY}`,
+        }
       )
       .then(
         () => {
-          toast.success("Message sent!", {
+          console.log("SUCCESS!");
+          toast.success("Message sent", {
             position: "bottom-left",
             autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
             theme: "dark",
+            className: `custom-toast font-kumbhSans`,
           });
           reset();
-          setTimeout(() => setFormDisplay(false), 3000);
+          setTimeout(() => setFormDisplay(!formDisplay), 5000);
         },
         (error) => {
-          console.error("EmailJS Error:", error);
-          toast.error("Failed to send. Please try again.", {
+          console.log("FAILED...", error.text);
+          toast.error("Message not sent, check your network", {
             position: "bottom-left",
             autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
             theme: "dark",
+            className: `custom-toast font-kumbhSans`,
           });
         }
       );
@@ -102,20 +103,26 @@ export default function Contact() {
       >
         {!formDisplay ? (
           <div
-            className={`${syne.className} flex justify-between items-center w-full duration-1000`}
+            className={` ${
+              syne.className
+            } flex justify-between items-center w-full duration-1000 ${
+              formDisplay && "opacity-0"
+            }`}
           >
             <div className="inline w-full">
               <AnimatedTitle
-                wordSpace="mr-2 md:mr-[12px]"
-                charSpace="mr-[0.001em]"
-                className="text-xl sm:text-2xl md:text-[32px] lg:text-[40px] font-bold pt-4 md:pt-10 lg:pt-12"
+                wordSpace={"mr-2 md:mr-[12px]"}
+                charSpace={"mr-[0.001em]"}
+                className="text-xl sm:text-2xl md:text-[32px] lg:text-[40px] font-bold pt-4 md:pt-10 lg:pt-12 "
               >
                 GOT A PROJECT IN MIND?
               </AnimatedTitle>
               <Link href="#footer" data-no-blobity>
                 <span
                   data-blobity
-                  onClick={() => setFormDisplay(true)}
+                  onClick={() => {
+                    setFormDisplay(!formDisplay);
+                  }}
                   className="text-xl sm:text-2xl md:text-[32px] w-fit underline lg:text-[40px] font-bold leading-tight hidden sm:block lg:hidden"
                 >
                   CONTACT ME
@@ -132,7 +139,9 @@ export default function Contact() {
                     : "opacity-0 translate-y-16"
                 }`}
                 data-blobity-radius="12"
-                onClick={() => setFormDisplay(true)}
+                onClick={() => {
+                  setFormDisplay(!formDisplay);
+                }}
               >
                 CONTACT&nbsp;ME
               </button>
@@ -146,11 +155,22 @@ export default function Contact() {
               transition={{ duration: 1, delay: 0.2 }}
               exit={{ opacity: 0 }}
               style={{
-                transform: "perspective(300px) rotateY(-180deg)",
+                transform: `${
+                  formDisplay
+                    ? "perspective(300px) rotateY(-180deg)"
+                    : "perspective(300px) rotateY(0deg)"
+                }`,
               }}
               className="w-full"
             >
               <div className="flex items-center justify-between py-4 md:py-5 lg:py-6">
+                <Link
+                  href="https://cal.com/adeolabadero/30min"
+                  target="_blank"
+                  className={`font-bold uppercase ${syne.className} underline opacity-50`}
+                >
+                  book a call?
+                </Link>
                 <Icon
                   icon="gg:close"
                   data-blobity
@@ -158,25 +178,25 @@ export default function Contact() {
                     setFormDisplay(false);
                     reset();
                   }}
-                  className="text-2xl opacity-50 cursor-pointer"
+                  className="text-2xl opacity-50"
                 />
               </div>
               <div className="flex items-center h-full gap-2 w-full">
                 <form
                   ref={formRef}
                   onSubmit={handleSubmit(onSubmit)}
-                  className="w-full flex flex-col gap-3"
+                  className={`back w-full flex flex-col gap-3 grow-2 basis-0`}
                 >
                   <div className="flex gap-1 flex-col">
                     <label
                       htmlFor="userName"
-                      className="opacity-70 text-sm lg:text-base"
+                      className="opacity-70 text-sm lg:text-base "
                     >
                       Name
                     </label>
                     <input
-                      id="userName"
                       type="text"
+                      id="userName"
                       {...register("userName", {
                         required: "I need to know your name",
                         pattern: {
@@ -184,18 +204,18 @@ export default function Contact() {
                           message: "Please enter a valid name.",
                         },
                       })}
-                      className="bg-transparent rounded-md border border-[#737373c4] focus:border-[#9f9d9dc4] outline-none py-1 pl-2"
+                      className="bg-transparent rounded-md border border-[#737373c4] focus:border-[#9f9d9dc4] outline-hidden py-1 pl-2"
                     />
                     {errors?.userName && (
                       <span className="text-red-400 text-xs">
-                        {errors.userName.message as string}
+                        {errors?.userName?.message as string}
                       </span>
                     )}
                   </div>
                   <div className="flex gap-1 flex-col">
                     <label
                       htmlFor="userEmail"
-                      className="opacity-70 text-sm lg:text-base"
+                      className="opacity-70 text-sm lg:text-base "
                     >
                       Email
                     </label>
@@ -209,11 +229,11 @@ export default function Contact() {
                           message: "Please provide a valid email address",
                         },
                       })}
-                      className="bg-transparent rounded-md border border-[#737373c4] focus:border-[#9f9d9dc4] outline-none py-1 pl-2"
+                      className="bg-transparent rounded-md border border-[#737373c4] focus:border-[#9f9d9dc4] outline-hidden py-1 pl-2"
                     />
                     {errors?.userEmail && (
                       <span className="text-red-400 text-xs">
-                        {errors.userEmail.message as string}
+                        {errors?.userEmail?.message as string}
                       </span>
                     )}
                   </div>
@@ -226,20 +246,20 @@ export default function Contact() {
                     </label>
                     <textarea
                       id="userMessage"
-                      rows={4}
                       {...register("userMessage", {
                         required: "I'll appreciate what you have to say.",
                       })}
-                      className="bg-transparent rounded-md border border-[#737373c4] focus:border-[#9f9d9dc4] outline-none py-1 pl-2"
+                      rows={4}
+                      cols={50}
+                      className="bg-transparent rounded-md border border-[#737373c4] focus:border-[#9f9d9dc4] outline-hidden py-1 pl-2"
                     />
                     {errors?.userMessage && (
                       <span className="text-red-400 text-xs">
-                        {errors.userMessage.message as string}
+                        {errors?.userMessage?.message as string}
                       </span>
                     )}
                   </div>
                   <button
-                    type="submit"
                     className={`rounded-md bg-linear-to-r from-[#d9d9d91f] to-[#7373731f] py-3 px-5 ${syne.className} font-bold uppercase mt-4`}
                   >
                     Send
