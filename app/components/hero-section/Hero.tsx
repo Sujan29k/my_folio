@@ -105,7 +105,7 @@ export default function Hero() {
           animate={animateIn2}
           className="text-white/40  text-xl smm:text-2xl lg:text-3xl xl:text-4xl mt-3 smm:mt-6 "
         >
-          currently focused on building  and learning web tech!
+          currently focused on building and learning web tech!
         </motion.p>
       </div>
 
@@ -114,7 +114,7 @@ export default function Hero() {
         <motion.div
           ref={imgRef}
           style={{ rotate }}
-          className="h-image flex items-center w-[310px] h-[380px] xl:w-[390px] xl:h-[470px] justify-center relative"
+          className="h-image flex items-center w-[380px] h-[450px] xl:w-[480px] xl:h-[580px] justify-center relative"
           initial={{ opacity: 0 }}
           animate={animateIn1}
         >
@@ -123,7 +123,7 @@ export default function Hero() {
             priority
             fill
             alt="Ade's picture"
-            className="bg-image-radial px-10 pt-20"
+            className="bg-image-radial px-8 pt-16"
           />
         </motion.div>
       </div>

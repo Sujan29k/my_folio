@@ -52,7 +52,7 @@ export default function About() {
             <Link
               className="underline"
               href={
-                "https://docs.google.com/document/d/1ysV_Nf7nXfQHLTb_7fSwdSyCIi6lWI9fWlBJ2f5vuSs/edit?usp=drive_link"
+                "https://drive.google.com/file/d/19_r6Syk-wPe1tSvs4FIqQMf957a5yNWS/view"
               }
             >
               my résumè
