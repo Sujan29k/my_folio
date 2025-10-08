@@ -190,7 +190,7 @@ export default function Contact() {
                     <input
                       type="text"
                       id="userName"
-                      {...register("userName", {
+                      {...register("sender_name", {
                         required: "I need to know your name",
                         pattern: {
                           value: /^[a-zA-Z][a-zA-Z0-9]{2,}/,
@@ -199,9 +199,9 @@ export default function Contact() {
                       })}
                       className="bg-transparent rounded-md border border-[#737373c4] focus:border-[#9f9d9dc4] outline-hidden py-1 pl-2"
                     />
-                    {errors?.userName && (
+                    {errors?.sender_name && (
                       <span className="text-red-400 text-xs">
-                        {errors?.userName?.message as string}
+                        {errors?.sender_name?.message as string}
                       </span>
                     )}
                   </div>
@@ -215,7 +215,7 @@ export default function Contact() {
                     <input
                       id="userEmail"
                       type="email"
-                      {...register("userEmail", {
+                      {...register("sender_email", {
                         required: "Enter a correct email address",
                         pattern: {
                           value: /\S+@\S+\.\S+/,
@@ -224,9 +224,9 @@ export default function Contact() {
                       })}
                       className="bg-transparent rounded-md border border-[#737373c4] focus:border-[#9f9d9dc4] outline-hidden py-1 pl-2"
                     />
-                    {errors?.userEmail && (
+                    {errors?.sender_email && (
                       <span className="text-red-400 text-xs">
-                        {errors?.userEmail?.message as string}
+                        {errors?.sender_email?.message as string}
                       </span>
                     )}
                   </div>
@@ -239,16 +239,16 @@ export default function Contact() {
                     </label>
                     <textarea
                       id="userMessage"
-                      {...register("userMessage", {
+                      {...register("message", {
                         required: "I'll appreciate what you have to say.",
                       })}
                       rows={4}
                       cols={50}
                       className="bg-transparent rounded-md border border-[#737373c4] focus:border-[#9f9d9dc4] outline-hidden py-1 pl-2"
                     />
-                    {errors?.userMessage && (
+                    {errors?.message && (
                       <span className="text-red-400 text-xs">
-                        {errors?.userMessage?.message as string}
+                        {errors?.message?.message as string}
                       </span>
                     )}
                   </div>

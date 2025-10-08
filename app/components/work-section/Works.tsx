@@ -14,7 +14,7 @@ export default function Works() {
   const works = [
     {
       title: "Anonymous application",
-      gitlink:"https://github.com/Sujan29k/anonymus-app.git",
+      gitlink: "https://github.com/Sujan29k/anonymus-app.git",
       liveLink: "#",
       about:
         "A simple anonymous application that allows users to send messages without revealing their identity. It features a clean design and easy navigation, making it user-friendly.",
@@ -25,7 +25,7 @@ export default function Works() {
     {
       title: "fitness Tracker",
       liveLink: "#",
-      gitlink:"https://github.com/Sujan29k/Fitness-Tracker.git",
+      gitlink: "https://github.com/Sujan29k/Fitness-Tracker.git",
       about:
         "A fitness tracker application that helps users monitor their workouts, nutrition, and progress. It features a sleek design and intuitive user interface, making it easy to track fitness goals.",
       stack: ["next.js", "typescript", "framer motion", "tailwindcss"],
@@ -41,7 +41,26 @@ export default function Works() {
       stack: ["next.js", "typescript", "framer motion", "tailwindcss"],
       img: "/finance.png",
     },
-    
+
+    {
+      title: "Jadi Mart",
+      gitLink: "https://github.com/Sujan29k/financemanager.git",
+      liveLink: "#",
+      about:
+        "Simple ecommerce site for selling products online for a product selling company. I made it user-friendly and attractive design for users.",
+      stack: ["next.js", "typescript", "framer motion", "tailwindcss"],
+      img: "/jadimart.png",
+    },
+    {
+      title: "Chess_Engine",
+      gitLink: "https://github.com/Sujan29k/Chess_Engine.git",
+      liveLink: "#",
+      about:
+        "A chess engine built using Python that allows users to play chess against the computer. It features a simple and intuitive interface, making it easy for users to enjoy a game of chess.",
+      stack: ["next.js", "typescript", "framer motion", "tailwindcss","stockfish","websockets","chess.js"],
+      img: "/chessengine.png",
+    },
+
     // {
     //   title: "Yourtodo",
     //   gitLink: "https://github.com/adex-hub/Yourtodo",
@@ -51,7 +70,6 @@ export default function Works() {
     //   stack: ["react", "javascript", "figma", "sass"],
     //   img: "/todo.svg",
     // },
-    
   ];
 
   const { ref, inView } = useInView({
