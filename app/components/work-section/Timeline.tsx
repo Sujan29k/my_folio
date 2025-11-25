@@ -8,9 +8,9 @@ const syne = Syne({ subsets: ["latin"] });
 const TimelineData = [
   {
     companyImg: "/bluechip.svg",
-    jobTitle: "web",
-    company: "to be known ",
-    jobType: "unknownn",
+    jobTitle: "intern Software Developer",
+    company: "XTenIT ",
+    jobType: "Flutter Developer ",
     duration: "to be known", // Added comma here
     stuffIDid: [
     "dont know till now" 

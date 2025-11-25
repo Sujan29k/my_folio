@@ -105,7 +105,7 @@ export default function Hero() {
           animate={animateIn2}
           className="text-white/40  text-xl smm:text-2xl lg:text-3xl xl:text-4xl mt-3 smm:mt-6 "
         >
-          currently focused on building and learning web tech!
+          currently focused on building and learning web tech as well as crossplaform mobile applicaion!
         </motion.p>
       </div>
 
