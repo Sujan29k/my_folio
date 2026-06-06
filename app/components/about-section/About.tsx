@@ -1,15 +1,32 @@
-import React, { useEffect } from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Syne } from "next/font/google";
 import { useView } from "@/contexts/ViewContext";
 import { useInView } from "react-intersection-observer";
 import AnimatedBody from "../ui/AnimatedBody";
 import AnimatedTitle from "../ui/AnimatedTitle";
+import { getSkills, type Skill } from "@/lib/api";
 
 const syne = Syne({ subsets: ["latin"] });
 
 export default function About() {
   const { setSectionInView } = useView();
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [skillsLoading, setSkillsLoading] = useState(true);
+  const [skillsError, setSkillsError] = useState(false);
+
+  useEffect(() => {
+    getSkills()
+      .then((data) => {
+        setSkills(data);
+        setSkillsLoading(false);
+      })
+      .catch(() => {
+        setSkillsError(true);
+        setSkillsLoading(false);
+      });
+  }, []);
 
   const { ref, inView } = useInView({
     threshold: 0.2,
@@ -41,8 +58,8 @@ export default function About() {
           <AnimatedBody className="leading-[34px] md:leading-[39px]">
             From writing my first lines of code back in late 2019 to this point
             I have continually refined my development skills overtime picking up
-            UI/UX design on the way & solving complex challenges increasing the
-            complexity as time goes by to ensure improvement.
+            UI/UX design on the way &amp; solving complex challenges increasing
+            the complexity as time goes by to ensure improvement.
           </AnimatedBody>
           <AnimatedBody className="inline leading-[34px] md:leading-[39px]">
             Each challenge is unique so I ensure that I learn and grow through
@@ -60,45 +77,43 @@ export default function About() {
             .
           </AnimatedBody>
         </div>
+
+        {/* SKILLS */}
         <div className="grid grid-cols-1 gap-4">
-          <div>
-            <AnimatedTitle
-              wordSpace={"mr-[0.5ch]"}
-              charSpace={"mr-[0.001em]"}
-              className="font-bold antialiased text-xl md:text-2xl mb-2"
-            >
-              Frontend Tools
-            </AnimatedTitle>
-            <AnimatedBody className="text-white/60 text-base md:text-xl leading-8">
-              JavaScript(ES6+), React, Next.js, TypeScript, Redux, , , HTML5,
-              Git/GitHub, React Hook Form, Formik.
-            </AnimatedBody>
-          </div>
-          <div>
-            <AnimatedTitle
-              wordSpace={"mr-[0.5ch]"}
-              charSpace={"mr-[0.001em]"}
-              className="font-bold antialiased text-xl md:text-2xl mb-2"
-            >
-              UI Libraries
-            </AnimatedTitle>
-            <AnimatedBody className="text-white/60 text-base md:text-xl leading-8">
-              CSS3/SCSS/SASS, Tailwind CSS, Styled Components, Chakra UI, Framer
-              Motion, Bootstrap, ReCharts.
-            </AnimatedBody>
-          </div>
-          <div>
-            <AnimatedTitle
-              wordSpace={"mr-[0.5ch]"}
-              charSpace={"mr-[0.001em]"}
-              className="font-bold antialiased text-xl md:text-2xl mb-2"
-            >
-              Design Tools
-            </AnimatedTitle>
-            <AnimatedBody className="text-white/60 text-base md:text-xl leading-8">
-              Figma, , UX Research, UI Design, .
-            </AnimatedBody>
-          </div>
+          {skillsLoading && (
+            <div className="flex flex-col gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i}>
+                  <div className="h-6 w-32 bg-white/10 animate-pulse rounded mb-2" />
+                  <div className="h-4 w-full bg-white/10 animate-pulse rounded" />
+                  <div className="h-4 w-3/4 bg-white/10 animate-pulse rounded mt-1" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {skillsError && (
+            <p className="text-white/40 text-base">
+              Could not load skills. Please try again later.
+            </p>
+          )}
+
+          {!skillsLoading &&
+            !skillsError &&
+            skills.map((skill) => (
+              <div key={skill.id}>
+                <AnimatedTitle
+                  wordSpace={"mr-[0.5ch]"}
+                  charSpace={"mr-[0.001em]"}
+                  className="font-bold antialiased text-xl md:text-2xl mb-2"
+                >
+                  {skill.category}
+                </AnimatedTitle>
+                <AnimatedBody className="text-white/60 text-base md:text-xl leading-8">
+                  {skill.items.join(", ")}.
+                </AnimatedBody>
+              </div>
+            ))}
         </div>
       </div>
       <div className="mt-10 sm:mt-20 lg:mt-10 mx-auto w-fit"></div>

@@ -1,8 +1,7 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  delay,
   easeIn,
   easeInOut,
   motion,
@@ -13,8 +12,25 @@ import {
 import "intersection-observer";
 import { useInView } from "react-intersection-observer";
 import { useView } from "@/contexts/ViewContext";
+import { getHero, type Hero as HeroData } from "@/lib/api";
 
 export default function Hero() {
+  const [heroData, setHeroData] = useState<HeroData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    getHero()
+      .then((data) => {
+        setHeroData(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
+  }, []);
+
   const handWaveAnimation = {
     rotate: [0, 15, -10, 15, -10, 15, -10, 15, -10, 15, 0],
     transition: {
@@ -59,6 +75,11 @@ export default function Hero() {
 
   const rotate = useTransform(scrollYProgress, [0, 1], ["0deg", "-15deg"]);
 
+  // Fallback values if API is unreachable or field is empty
+  const name = heroData?.name || "Sujan Kharel";
+  const subtitle = heroData?.subtitle || "currently focused on building and learning web tech as well as crossplatform mobile application!";
+  const imageUrl = heroData?.image_url || "/sujan_nobg.png";
+
   return (
     <section
       ref={ref}
@@ -88,25 +109,38 @@ export default function Hero() {
             />
           </motion.div>
         </motion.div>
-        <motion.h1
-          className="text-[32px] smm:text-[40px] md:text-5xl lg:text-6xl xl:text-7xl leading-tight font-bold"
-          initial={{ opacity: 0 }}
-          animate={animateIn1}
-        >
-          <p className="text-white/60 inline">I&apos;m </p>
-          <span className="bg-linear-to-br bg-clip-text text-transparent from-[#7CC0C4] via-[#548FBA] to-[#3C84C7]">
-            Sujan Kharel
-          </span>
-          <p>a Computer Engineering Student</p>
-        </motion.h1>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={animateIn2}
-          className="text-white/40  text-xl smm:text-2xl lg:text-3xl xl:text-4xl mt-3 smm:mt-6 "
-        >
-          currently focused on building and learning web tech as well as crossplaform mobile applicaion!
-        </motion.p>
+        {loading ? (
+          <div className="flex flex-col gap-4 mt-4">
+            <div className="h-12 w-3/4 bg-white/10 animate-pulse rounded-lg" />
+            <div className="h-8 w-full bg-white/10 animate-pulse rounded-lg" />
+          </div>
+        ) : error ? (
+          <div className="text-white/40 text-xl mt-4">
+            Could not load hero data. Please try again later.
+          </div>
+        ) : (
+          <>
+            <motion.h1
+              className="text-[32px] smm:text-[40px] md:text-5xl lg:text-6xl xl:text-7xl leading-tight font-bold"
+              initial={{ opacity: 0 }}
+              animate={animateIn1}
+            >
+              <p className="text-white/60 inline">I&apos;m </p>
+              <span className="bg-linear-to-br bg-clip-text text-transparent from-[#7CC0C4] via-[#548FBA] to-[#3C84C7]">
+                {name}
+              </span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={animateIn2}
+              className="text-white/40 text-xl smm:text-2xl lg:text-3xl xl:text-4xl mt-3 smm:mt-6"
+            >
+              {subtitle}
+            </motion.p>
+          </>
+        )}
       </div>
 
       {/* IMAGE */}
@@ -118,13 +152,18 @@ export default function Hero() {
           initial={{ opacity: 0 }}
           animate={animateIn1}
         >
-          <Image
-            src="/sujan_nobg.png"
-            priority
-            fill
-            alt="Ade's picture"
-            className="bg-image-radial px-8 pt-16"
-          />
+          {loading ? (
+            <div className="w-full h-full bg-white/10 animate-pulse rounded-2xl" />
+          ) : (
+            <Image
+              src={imageUrl}
+              priority
+              fill
+              unoptimized
+              alt={`${name}'s picture`}
+              className="bg-image-radial px-8 pt-16"
+            />
+          )}
         </motion.div>
       </div>
     </section>
