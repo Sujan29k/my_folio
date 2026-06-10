@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { FiUser, FiImage } from 'react-icons/fi';
 
 interface Hero {
   id?: number;
@@ -75,16 +76,13 @@ export default function AdminHero() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070d14] text-white">
-      <header className="border-b border-white/10 px-8 py-4 flex items-center gap-4 bg-[#070d14]/90 backdrop-blur-sm sticky top-0 z-10">
-        <button onClick={() => router.push('/admin')} className="text-white/40 hover:text-white transition-colors text-sm">
-          ← Back
-        </button>
-        <div className="w-px h-5 bg-white/20" />
-        <h1 className="text-lg font-bold">👤 Hero Section</h1>
-      </header>
-
-      <div className="max-w-3xl mx-auto px-6 py-10 flex flex-col gap-8">
+    <div className="flex flex-col gap-8 max-w-3xl">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <FiUser className="text-teal-400" />
+          Hero Section
+        </h1>
+      </div>
         {message && (
           <div className={`px-5 py-3 rounded-xl text-sm font-medium ${message.type === 'success' ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 'bg-red-500/20 text-red-300 border border-red-500/30'}`}>
             {message.text}
@@ -161,7 +159,7 @@ export default function AdminHero() {
                     <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                     {uploading
                       ? <div className="flex items-center gap-2 text-teal-400 text-sm"><div className="w-4 h-4 border-2 border-teal-400 border-t-transparent rounded-full animate-spin" />Uploading...</div>
-                      : <><span className="text-2xl">🖼️</span><span className="text-sm text-white/50">Click to upload your photo</span></>
+                      : <><FiImage className="w-8 h-8 text-white/30 mb-2" /><span className="text-sm text-white/50">Click to upload your photo</span></>
                     }
                   </div>
                 )}
@@ -207,7 +205,6 @@ export default function AdminHero() {
             </button>
           </div>
         )}
-      </div>
     </div>
   );
 }

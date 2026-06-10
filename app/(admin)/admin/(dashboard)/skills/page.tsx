@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { FiZap, FiEdit2, FiPlus } from 'react-icons/fi';
 
 interface Skill {
   id?: number;
@@ -129,22 +130,16 @@ export default function AdminSkills() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070d14] text-white">
-      <header className="border-b border-white/10 px-8 py-4 flex items-center gap-4 bg-[#070d14]/90 backdrop-blur-sm sticky top-0 z-10">
-        <button
-          onClick={() => router.push('/admin')}
-          className="text-white/40 hover:text-white transition-colors text-sm"
-        >
-          Back
-        </button>
-        <div className="w-px h-5 bg-white/20" />
-        <h1 className="text-lg font-bold">Skills</h1>
-        <span className="ml-auto text-xs text-white/30">
+    <div className="flex flex-col gap-8 max-w-3xl">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <FiZap className="text-yellow-400" />
+          Skills
+        </h1>
+        <span className="text-sm text-white/50 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
           {skills.length} {skills.length !== 1 ? 'categories' : 'category'}
         </span>
-      </header>
-
-      <div className="max-w-3xl mx-auto px-6 py-10 flex flex-col gap-8">
+      </div>
 
         {message.length > 0 && (
           <div
@@ -158,9 +153,9 @@ export default function AdminSkills() {
           </div>
         )}
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold mb-5">
-            {editingId ? 'Edit Category' : 'Add Skill Category'}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-sm">
+          <h2 className="text-lg font-medium mb-5 flex items-center gap-2 text-white/90">
+            {editingId ? <><FiEdit2 className="text-yellow-400" /> Edit Category</> : <><FiPlus className="text-yellow-400" /> Add Skill Category</>}
           </h2>
           <div className="flex flex-col gap-4">
             <input
@@ -313,7 +308,6 @@ export default function AdminSkills() {
           )}
         </div>
 
-      </div>
     </div>
   );
 }

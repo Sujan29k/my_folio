@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { FiBriefcase, FiEdit2, FiPlus, FiImage } from 'react-icons/fi';
 
 interface Experience {
   id?: number;
@@ -122,17 +123,16 @@ export default function AdminExperience() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070d14] text-white">
-      <header className="border-b border-white/10 px-8 py-4 flex items-center gap-4 bg-[#070d14]/90 backdrop-blur-sm sticky top-0 z-10">
-        <button onClick={() => router.push('/admin')} className="text-white/40 hover:text-white transition-colors text-sm">
-          ← Back
-        </button>
-        <div className="w-px h-5 bg-white/20" />
-        <h1 className="text-lg font-bold">💼 Work Experience</h1>
-        <span className="ml-auto text-xs text-white/30">{items.length} entr{items.length !== 1 ? 'ies' : 'y'}</span>
-      </header>
-
-      <div className="max-w-4xl mx-auto px-6 py-10 flex flex-col gap-8">
+    <div className="flex flex-col gap-8 max-w-4xl">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <FiBriefcase className="text-purple-400" />
+          Work Experience
+        </h1>
+        <span className="text-sm text-white/50 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+          {items.length} entr{items.length !== 1 ? 'ies' : 'y'}
+        </span>
+      </div>
         {message && (
           <div className={`px-5 py-3 rounded-xl text-sm font-medium ${message.type === 'success' ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 'bg-red-500/20 text-red-300 border border-red-500/30'}`}>
             {message.text}
@@ -140,8 +140,10 @@ export default function AdminExperience() {
         )}
 
         {/* Form */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold mb-5">{editingId ? '✏️ Edit Entry' : '+ Add Experience'}</h2>
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-sm">
+          <h2 className="text-lg font-medium mb-5 flex items-center gap-2 text-white/90">
+            {editingId ? <><FiEdit2 className="text-purple-400" /> Edit Entry</> : <><FiPlus className="text-purple-400" /> Add Experience</>}
+          </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <input
@@ -231,7 +233,7 @@ export default function AdminExperience() {
                   <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
                   {uploading
                     ? <div className="flex items-center gap-2 text-purple-400 text-sm"><div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />Uploading...</div>
-                    : <span className="text-sm text-white/50">📷 Click to upload logo</span>
+                    : <span className="text-sm text-white/50 flex items-center gap-2"><FiImage className="w-5 h-5 text-white/30" /> Click to upload logo</span>
                   }
                 </div>
               )}
@@ -291,7 +293,6 @@ export default function AdminExperience() {
             </div>
           ))}
         </div>
-      </div>
     </div>
   );
 }
