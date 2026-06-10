@@ -39,13 +39,14 @@ export default function FolioCard({
         inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
       }`}
     >
-      <Image
-        src={img}
-        width={420}
-        height={700}
-        alt="work"
-        className="rounded-[10px] w-full lg:col-span-5"
-      />
+      <div className="relative w-full lg:col-span-5 aspect-video rounded-[10px] overflow-hidden">
+  <Image
+    src={img}
+    fill
+    alt="work"
+    className="object-cover"
+  />
+</div>
       <div className="flex flex-col gap-4 lg:col-span-7">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl sm:text-4xl xl:text-5xl font-bold">
