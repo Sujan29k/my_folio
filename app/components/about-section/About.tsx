@@ -6,7 +6,7 @@ import { useView } from "@/contexts/ViewContext";
 import { useInView } from "react-intersection-observer";
 import AnimatedBody from "../ui/AnimatedBody";
 import AnimatedTitle from "../ui/AnimatedTitle";
-import { getSkills, type Skill } from "@/lib/api";
+import { getSkills, getResume, type Skill } from "@/lib/api";
 
 const syne = Syne({ subsets: ["latin"] });
 
@@ -15,6 +15,7 @@ export default function About() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [skillsLoading, setSkillsLoading] = useState(true);
   const [skillsError, setSkillsError] = useState(false);
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
 
   useEffect(() => {
     getSkills()
@@ -26,6 +27,9 @@ export default function About() {
         setSkillsError(true);
         setSkillsLoading(false);
       });
+
+    // fetch resume url
+    getResume().then((data) => setResumeUrl(data.resume_url));
   }, []);
 
   const { ref, inView } = useInView({
@@ -66,14 +70,18 @@ export default function About() {
             each one ensuring that I not only put in my best but also deliver
             solutions that businesses are proud to call their own. Wanna learn
             more? Here&apos;s <br className="hidden md:block" />
-            <Link
-              className="underline"
-              href={
-                "https://drive.google.com/file/d/19_r6Syk-wPe1tSvs4FIqQMf957a5yNWS/view"
-              }
-            >
-              my résumè
-            </Link>
+            {resumeUrl ? (
+              <Link
+                className="underline"
+                href={resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                my résumè
+              </Link>
+            ) : (
+              <span className="underline opacity-40">my résumè</span>
+            )}
             .
           </AnimatedBody>
         </div>
@@ -91,13 +99,11 @@ export default function About() {
               ))}
             </div>
           )}
-
           {skillsError && (
             <p className="text-white/40 text-base">
               Could not load skills. Please try again later.
             </p>
           )}
-
           {!skillsLoading &&
             !skillsError &&
             skills.map((skill) => (
@@ -116,7 +122,6 @@ export default function About() {
             ))}
         </div>
       </div>
-      <div className="mt-10 sm:mt-20 lg:mt-10 mx-auto w-fit"></div>
     </section>
   );
 }

@@ -61,3 +61,13 @@ export async function getSkills(): Promise<Skill[]> {
   if (!res.ok) throw new Error("Failed to fetch skills");
   return res.json();
 }
+
+export async function getResume(): Promise<{ resume_url: string | null }> {
+  try {
+    const res = await fetch(`${BASE_URL}/api/about/resume`);
+    if (!res.ok) return { resume_url: null };
+    return res.json();
+  } catch {
+    return { resume_url: null };
+  }
+}
