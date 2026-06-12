@@ -5,10 +5,27 @@ require('dotenv').config();
 
 const app = express();
 
-app.use(cors({ origin: process.env.ALLOWED_ORIGIN || '*' }));
+const allowedOrigins = [
+  'https://kharelsujan.com.np',
+  'https://www.kharelsujan.com.np',
+  'http://localhost:3000',
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (Postman, mobile apps)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 
-// Serve uploaded images statically
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 app.use('/api/hero', require('./routes/hero'));
