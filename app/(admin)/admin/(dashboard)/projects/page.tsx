@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { adminFetch } from "@/lib/admin-api";
 import Link from 'next/link';
 import Image from 'next/image';
 import { FiFolder, FiEdit2, FiTrash2, FiImage, FiPlus } from 'react-icons/fi';
@@ -27,8 +27,6 @@ const empty: Project = {
 };
 
 export default function AdminProjects() {
-  const router = useRouter();
-  const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [projects, setProjects] = useState<Project[]>([]);
@@ -42,11 +40,7 @@ export default function AdminProjects() {
   const [previewUrl, setPreviewUrl] = useState('');
 
   useEffect(() => {
-    if (localStorage.getItem('admin_auth') !== 'true') {
-      router.push('/admin/login');
-    } else {
-      fetchProjects();
-    }
+    fetchProjects().catch(() => showMessage("Could not load projects", "error"));
   }, []);
 
   useEffect(() => {
@@ -54,7 +48,7 @@ export default function AdminProjects() {
   }, [form.image_url]);
 
   const fetchProjects = async () => {
-    const res = await fetch(`${API}/api/projects`);
+    const res = await adminFetch(`projects`);
     const data = await res.json();
     setProjects(data);
   };
@@ -66,7 +60,7 @@ export default function AdminProjects() {
     const fd = new FormData();
     fd.append('image', file);
     try {
-      const res = await fetch(`${API}/api/upload`, { method: 'POST', body: fd });
+      const res = await adminFetch(`upload`, { method: 'POST', body: fd });
       const data = await res.json();
       if (data.url) {
         setForm((f) => ({ ...f, image_url: data.url }));
@@ -88,18 +82,18 @@ export default function AdminProjects() {
     if (!form.title) return;
     setLoading(true);
     const method = editingId ? 'PUT' : 'POST';
-    const url = editingId ? `${API}/api/projects/${editingId}` : `${API}/api/projects`;
+    const url = editingId ? `projects/${editingId}` : `projects`;
     try {
-      await fetch(url, {
+      await adminFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
       showMessage(editingId ? '✓ Project updated!' : '✓ Project added!', 'success');
       reset();
-      fetchProjects();
-    } catch {
-      showMessage('Something went wrong', 'error');
+      await fetchProjects();
+    } catch (error) {
+      showMessage(error instanceof Error ? error.message : 'Something went wrong', 'error');
     } finally {
       setLoading(false);
     }
@@ -115,8 +109,12 @@ export default function AdminProjects() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this project?')) return;
-    await fetch(`${API}/api/projects/${id}`, { method: 'DELETE' });
-    fetchProjects();
+    try {
+      await adminFetch(`projects/${id}`, { method: 'DELETE' });
+      await fetchProjects();
+    } catch (error) {
+      showMessage(error instanceof Error ? error.message : 'Delete failed', 'error');
+    }
   };
 
   const reset = () => {

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { adminFetch } from "@/lib/admin-api";
 import Image from 'next/image';
 import { FiUser, FiImage } from 'react-icons/fi';
 
@@ -15,8 +15,6 @@ interface Hero {
 const empty: Hero = { name: '', subtitle: '', image_url: '', github_url: '' };
 
 export default function AdminHero() {
-  const router = useRouter();
-  const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<Hero>(empty);
@@ -27,14 +25,10 @@ export default function AdminHero() {
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
-    if (localStorage.getItem('admin_auth') !== 'true') {
-      router.push('/admin/login');
-      return;
-    }
-    fetch(`${API}/api/hero`)
+    adminFetch(`hero`)
       .then((r) => r.json())
       .then((data) => { setForm(data || empty); setFetching(false); })
-      .catch(() => setFetching(false));
+      .catch((error) => { showMessage(error.message || 'Could not load hero', 'error'); setFetching(false); });
   }, []);
 
   const showMessage = (text: string, type: 'success' | 'error') => {
@@ -49,7 +43,7 @@ export default function AdminHero() {
     const fd = new FormData();
     fd.append('image', file);
     try {
-      const res = await fetch(`${API}/api/upload`, { method: 'POST', body: fd });
+      const res = await adminFetch(`upload`, { method: 'POST', body: fd });
       const data = await res.json();
       if (data.url) setForm((f) => ({ ...f, image_url: data.url }));
     } catch {
@@ -62,14 +56,15 @@ export default function AdminHero() {
   const handleSave = async () => {
     setLoading(true);
     try {
-      await fetch(`${API}/api/hero`, {
+      const response = await adminFetch(`hero`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
+      setForm(await response.json());
       showMessage('✓ Hero section updated!', 'success');
-    } catch {
-      showMessage('Something went wrong', 'error');
+    } catch (error) {
+      showMessage(error instanceof Error ? error.message : 'Something went wrong', 'error');
     } finally {
       setLoading(false);
     }

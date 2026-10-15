@@ -1,3 +1,4 @@
+"use client";
 import { useView } from "@/contexts/ViewContext";
 import { Icon } from "@iconify/react/dist/iconify.js";
 // import Link from "next/link";

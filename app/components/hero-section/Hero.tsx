@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   easeIn,
   easeInOut,
@@ -12,24 +12,10 @@ import {
 import "intersection-observer";
 import { useInView } from "react-intersection-observer";
 import { useView } from "@/contexts/ViewContext";
-import { getHero, type Hero as HeroData } from "@/lib/api";
+import type { Hero as HeroData, PublicResult } from "@/lib/api";
 
-export default function Hero() {
-  const [heroData, setHeroData] = useState<HeroData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    getHero()
-      .then((data) => {
-        setHeroData(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(true);
-        setLoading(false);
-      });
-  }, []);
+export default function Hero({ result }: { result: PublicResult<HeroData> }) {
+  const { data: heroData, error } = result;
 
   const handWaveAnimation = {
     rotate: [0, 15, -10, 15, -10, 15, -10, 15, -10, 15, 0],
@@ -75,10 +61,9 @@ export default function Hero() {
 
   const rotate = useTransform(scrollYProgress, [0, 1], ["0deg", "-15deg"]);
 
-  // Fallback values if API is unreachable or field is empty
-  const name = heroData?.name || "Sujan Kharel";
-  const subtitle = heroData?.subtitle || "currently focused on building and learning web tech as well as crossplatform mobile application!";
-  const imageUrl = heroData?.image_url || "/sujan_nobg.png";
+  const name = heroData?.name;
+  const subtitle = heroData?.subtitle;
+  const imageUrl = heroData?.image_url;
 
   return (
     <section
@@ -110,14 +95,9 @@ export default function Hero() {
           </motion.div>
         </motion.div>
 
-        {loading ? (
-          <div className="flex flex-col gap-4 mt-4">
-            <div className="h-12 w-3/4 bg-white/10 animate-pulse rounded-lg" />
-            <div className="h-8 w-full bg-white/10 animate-pulse rounded-lg" />
-          </div>
-        ) : error ? (
+        {error ? (
           <div className="text-white/40 text-xl mt-4">
-            Could not load hero data. Please try again later.
+            {error}
           </div>
         ) : (
           <>
@@ -152,9 +132,7 @@ export default function Hero() {
           initial={{ opacity: 0 }}
           animate={animateIn1}
         >
-          {loading ? (
-            <div className="w-full h-full bg-white/10 animate-pulse rounded-2xl" />
-          ) : (
+          {imageUrl && (
             <Image
               src={imageUrl}
               priority

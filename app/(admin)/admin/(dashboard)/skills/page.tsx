@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { adminFetch } from "@/lib/admin-api";
 import { FiZap, FiEdit2, FiPlus } from 'react-icons/fi';
 
 interface Skill {
@@ -12,8 +12,6 @@ interface Skill {
 const emptySkill: Skill = { category: '', items: [] };
 
 export default function AdminSkills() {
-  const router = useRouter();
-  const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   const [skills, setSkills] = useState<Skill[]>([]);
   const [form, setForm] = useState<Skill>(emptySkill);
@@ -28,67 +26,52 @@ export default function AdminSkills() {
   const [resumeMessage, setResumeMessage] = useState('');
   const [resumeMessageType, setResumeMessageType] = useState<'success' | 'error'>('success');
 
-  useEffect(() => {
-    if (localStorage.getItem('admin_auth') !== 'true') {
-      router.push('/admin/login');
-    } else {
-      fetchSkills();
-      fetchResume();
-    }
-  }, []);
-
-  const fetchSkills = async () => {
-    try {
-      const res = await fetch(`${API}/api/about/skills`);
-      const data = await res.json();
-      setSkills(data);
-    } catch (err) {
-      console.error('Failed to fetch skills', err);
-    }
-  };
-
-  const fetchResume = async () => {
-    try {
-      const res = await fetch(`${API}/api/about/resume`);
-      const data = await res.json();
-      if (data.resume_url) {
-        setResumeUrl(data.resume_url);
-      }
-    } catch (err) {
-      console.error('Failed to fetch resume', err);
-    }
-  };
-
-  const showMessage = (text: string, type: 'success' | 'error') => {
+  const showMessage = useCallback((text: string, type: 'success' | 'error') => {
     setMessage(text);
     setMessageType(type);
     setTimeout(() => setMessage(''), 3500);
-  };
+  }, []);
 
-  const showResumeMessage = (text: string, type: 'success' | 'error') => {
+  const showResumeMessage = useCallback((text: string, type: 'success' | 'error') => {
     setResumeMessage(text);
     setResumeMessageType(type);
     setTimeout(() => setResumeMessage(''), 3500);
-  };
+  }, []);
+
+  const fetchSkills = useCallback(async () => {
+    const res = await adminFetch('about/skills');
+    setSkills(await res.json());
+  }, []);
+
+  const fetchResume = useCallback(async () => {
+    const res = await adminFetch('about/resume');
+    const data = await res.json();
+    setResumeUrl(data.resume_url || '');
+  }, []);
+
+  useEffect(() => {
+    fetchSkills().catch(() => showMessage('Could not load skills', 'error'));
+    fetchResume().catch(() => showResumeMessage('Could not load resume', 'error'));
+  }, [fetchSkills, fetchResume, showMessage, showResumeMessage]);
 
   const handleSubmit = async () => {
     if (!form.category) return;
     setLoading(true);
     const method = editingId ? 'PUT' : 'POST';
     const url = editingId
-      ? `${API}/api/about/skills/${editingId}`
-      : `${API}/api/about/skills`;
+      ? `about/skills/${editingId}`
+      : `about/skills`;
     try {
-      await fetch(url, {
+      await adminFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
       showMessage(editingId ? 'Updated!' : 'Category added!', 'success');
       reset();
-      fetchSkills();
-    } catch {
-      showMessage('Something went wrong', 'error');
+      await fetchSkills();
+    } catch (error) {
+      showMessage(error instanceof Error ? error.message : 'Something went wrong', 'error');
     } finally {
       setLoading(false);
     }
@@ -103,21 +86,26 @@ export default function AdminSkills() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this skill category?')) return;
-    await fetch(`${API}/api/about/skills/${id}`, { method: 'DELETE' });
-    fetchSkills();
+    try {
+      await adminFetch(`about/skills/${id}`, { method: 'DELETE' });
+      await fetchSkills();
+    } catch (error) {
+      showMessage(error instanceof Error ? error.message : 'Delete failed', 'error');
+    }
   };
 
   const handleResumeUpdate = async () => {
     setResumeLoading(true);
     try {
-      await fetch(`${API}/api/about/resume`, {
+      await adminFetch(`about/resume`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ resume_url: resumeUrl }),
       });
+      await fetchResume();
       showResumeMessage('Resume link updated!', 'success');
-    } catch {
-      showResumeMessage('Something went wrong', 'error');
+    } catch (error) {
+      showResumeMessage(error instanceof Error ? error.message : 'Something went wrong', 'error');
     } finally {
       setResumeLoading(false);
     }

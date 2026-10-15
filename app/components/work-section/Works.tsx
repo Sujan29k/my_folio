@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import FolioCard from "./FolioCard";
 import Title from "../ui/Title";
 import { useView } from "@/contexts/ViewContext";
@@ -8,26 +8,15 @@ import { useView } from "@/contexts/ViewContext";
 import "intersection-observer";
 import { useInView } from "react-intersection-observer";
 import Timeline from "./Timeline";
-import { getProjects, type Project } from "@/lib/api";
+import type { Project, Experience, PublicResult } from "@/lib/api";
 import Link from "next/link";
 
-export default function Works() {
+export default function Works({ result, experience }: {
+  result: PublicResult<Project[]>;
+  experience: PublicResult<Experience[]>;
+}) {
   const { setSectionInView } = useView();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    getProjects()
-      .then((data) => {
-        setProjects(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(true);
-        setLoading(false);
-      });
-  }, []);
+  const { data: projects, error } = result;
 
   const { ref, inView } = useInView({
     threshold: 0.1,
@@ -39,7 +28,7 @@ export default function Works() {
   }, [inView, setSectionInView]);
 
   const PREVIEW_COUNT = 4;
-  const hasMore = projects.length > PREVIEW_COUNT;
+  const hasMore = (projects?.length ?? 0) > PREVIEW_COUNT;
 
   return (
     <section
@@ -49,32 +38,20 @@ export default function Works() {
     >
       <div className="flex items-end justify-between gap-4">
         <Title>Projects</Title>
-        {!loading && !error && projects.length > 0 && (
+        {projects && projects.length > 0 && (
           <span className="text-white/30 text-sm font-medium pb-1 shrink-0">
             {projects.length} project{projects.length !== 1 ? "s" : ""}
           </span>
         )}
       </div>
 
-      {loading && (
-        <div className="flex flex-col gap-6">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="w-full rounded-[20px] bg-white/5 animate-pulse h-[280px]"
-            />
-          ))}
-        </div>
-      )}
-
       {error && (
         <p className="text-white/40 text-xl">
-          Could not load projects. Please try again later.
+          {error}
         </p>
       )}
 
-      {!loading &&
-        !error &&
+      {projects &&
         projects.slice(0, PREVIEW_COUNT).map((project) => (
           <FolioCard
             key={project.id}
@@ -82,12 +59,12 @@ export default function Works() {
             title={project.title}
             gitLink={project.github_url || undefined}
             liveLink={project.live_url || "#"}
-            about={project.description}
+            about={project.description || ""}
             stack={project.tech_stack || []}
           />
         ))}
 
-      {!loading && !error && hasMore && (
+      {hasMore && (
         <div className="flex justify-center mt-2 mb-6">
           <Link
             href="/projects"
@@ -107,7 +84,7 @@ export default function Works() {
         </div>
       )}
 
-      <Timeline />
+      <Timeline result={experience} />
     </section>
   );
 }

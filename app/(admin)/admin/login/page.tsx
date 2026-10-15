@@ -1,18 +1,29 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
-      localStorage.setItem('admin_auth', 'true');
-      router.push('/admin');
-    } else {
-      setError('Wrong password');
+  const handleLogin = async () => {
+    if (loading) return;
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch('/api/admin/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+        cache: 'no-store',
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Login failed');
+      window.location.assign('/admin');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Login failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -31,9 +42,10 @@ export default function AdminLogin() {
         {error && <p className="text-red-400 mb-4">{error}</p>}
         <button
           onClick={handleLogin}
+          disabled={loading}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-semibold"
         >
-          Login
+          {loading ? 'Logging in…' : 'Login'}
         </button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { adminFetch } from "@/lib/admin-api";
 import Image from 'next/image';
 import { FiBriefcase, FiEdit2, FiPlus, FiImage } from 'react-icons/fi';
 
@@ -31,8 +31,6 @@ function fmtDate(d: string | null) {
 }
 
 export default function AdminExperience() {
-  const router = useRouter();
-  const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [items, setItems] = useState<Experience[]>([]);
@@ -45,15 +43,11 @@ export default function AdminExperience() {
   const [isCurrent, setIsCurrent] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem('admin_auth') !== 'true') {
-      router.push('/admin/login');
-    } else {
-      fetchItems();
-    }
+    fetchItems().catch(() => showMessage("Could not load experience", "error"));
   }, []);
 
   const fetchItems = async () => {
-    const res = await fetch(`${API}/api/experience`);
+    const res = await adminFetch(`experience`);
     const data = await res.json();
     setItems(data);
   };
@@ -70,7 +64,7 @@ export default function AdminExperience() {
     const fd = new FormData();
     fd.append('image', file);
     try {
-      const res = await fetch(`${API}/api/upload`, { method: 'POST', body: fd });
+      const res = await adminFetch(`upload`, { method: 'POST', body: fd });
       const data = await res.json();
       if (data.url) setForm((f) => ({ ...f, logo_url: data.url }));
     } catch {
@@ -85,18 +79,18 @@ export default function AdminExperience() {
     setLoading(true);
     const payload = { ...form, end_date: isCurrent ? null : form.end_date || null };
     const method = editingId ? 'PUT' : 'POST';
-    const url = editingId ? `${API}/api/experience/${editingId}` : `${API}/api/experience`;
+    const url = editingId ? `experience/${editingId}` : `experience`;
     try {
-      await fetch(url, {
+      await adminFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       showMessage(editingId ? '✓ Updated!' : '✓ Added!', 'success');
       reset();
-      fetchItems();
-    } catch {
-      showMessage('Something went wrong', 'error');
+      await fetchItems();
+    } catch (error) {
+      showMessage(error instanceof Error ? error.message : 'Something went wrong', 'error');
     } finally {
       setLoading(false);
     }
@@ -111,8 +105,12 @@ export default function AdminExperience() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this experience entry?')) return;
-    await fetch(`${API}/api/experience/${id}`, { method: 'DELETE' });
-    fetchItems();
+    try {
+      await adminFetch(`experience/${id}`, { method: 'DELETE' });
+      await fetchItems();
+    } catch (error) {
+      showMessage(error instanceof Error ? error.message : 'Delete failed', 'error');
+    }
   };
 
   const reset = () => {

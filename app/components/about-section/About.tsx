@@ -1,36 +1,22 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { Syne } from "next/font/google";
 import { useView } from "@/contexts/ViewContext";
 import { useInView } from "react-intersection-observer";
 import AnimatedBody from "../ui/AnimatedBody";
 import AnimatedTitle from "../ui/AnimatedTitle";
-import { getSkills, getResume, type Skill } from "@/lib/api";
+import type { Skill, Resume, PublicResult } from "@/lib/api";
 
 const syne = Syne({ subsets: ["latin"] });
 
-export default function About() {
+export default function About({ skillsResult, resumeResult }: {
+  skillsResult: PublicResult<Skill[]>;
+  resumeResult: PublicResult<Resume>;
+}) {
   const { setSectionInView } = useView();
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [skillsLoading, setSkillsLoading] = useState(true);
-  const [skillsError, setSkillsError] = useState(false);
-  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    getSkills()
-      .then((data) => {
-        setSkills(data);
-        setSkillsLoading(false);
-      })
-      .catch(() => {
-        setSkillsError(true);
-        setSkillsLoading(false);
-      });
-
-    // fetch resume url
-    getResume().then((data) => setResumeUrl(data.resume_url));
-  }, []);
+  const { data: skills, error: skillsError } = skillsResult;
+  const resumeUrl = resumeResult.data?.resume_url;
 
   const { ref, inView } = useInView({
     threshold: 0.2,
@@ -70,7 +56,9 @@ export default function About() {
             each one ensuring that I not only put in my best but also deliver
             solutions that businesses are proud to call their own. Wanna learn
             more? Here&apos;s <br className="hidden md:block" />
-            {resumeUrl ? (
+            {resumeResult.error ? (
+              <span className="text-white/40">{resumeResult.error}</span>
+            ) : resumeUrl ? (
               <Link
                 className="underline"
                 href={resumeUrl}
@@ -88,24 +76,12 @@ export default function About() {
 
         {/* SKILLS */}
         <div className="grid grid-cols-1 gap-4">
-          {skillsLoading && (
-            <div className="flex flex-col gap-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i}>
-                  <div className="h-6 w-32 bg-white/10 animate-pulse rounded mb-2" />
-                  <div className="h-4 w-full bg-white/10 animate-pulse rounded" />
-                  <div className="h-4 w-3/4 bg-white/10 animate-pulse rounded mt-1" />
-                </div>
-              ))}
-            </div>
-          )}
           {skillsError && (
             <p className="text-white/40 text-base">
-              Could not load skills. Please try again later.
+              {skillsError}
             </p>
           )}
-          {!skillsLoading &&
-            !skillsError &&
+          {skills &&
             skills.map((skill) => (
               <div key={skill.id}>
                 <AnimatedTitle
